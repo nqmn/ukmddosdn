@@ -1,0 +1,1 @@
+timestamp,switch_id,table_id,cookie,priority,in_port,eth_src,eth_dst,out_port,packet_count,byte_count,duration_sec,duration_nsec,avg_pkt_size,pkt_rate,byte_rate,Label_multi,Label_binary

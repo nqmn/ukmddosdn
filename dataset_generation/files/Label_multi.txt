@@ -1,0 +1,7 @@
+0 normal
+1 syn_flood
+2 udp_flood
+3 icmp_flood
+4 ad_syn
+5 ad_udp
+6 ad_slow

@@ -1,0 +1,42 @@
+2025-09-19 12:36:24,240 - INFO - Dataset directory: /mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4
+2025-09-19 12:36:24,241 - INFO - Maximum chunk size: 95 MB
+2025-09-19 12:36:24,244 - INFO - Chunks will be saved to: /mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4/github_chunks
+2025-09-19 12:36:24,244 - INFO - 
+============================================================
+2025-09-19 12:36:24,244 - INFO - Processing: packet_dataset.csv
+2025-09-19 12:36:24,244 - INFO - ============================================================
+2025-09-19 12:36:24,250 - INFO - Processing /mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4/packet_dataset.csv (229.2 MB)
+2025-09-19 12:36:32,393 - INFO - Estimated rows per chunk: 628,889
+2025-09-19 12:36:42,839 - INFO -   Chunk 1: 0 rows, 86.3 MB
+2025-09-19 12:36:50,697 - INFO -   Chunk 2: 0 rows, 86.0 MB
+2025-09-19 12:36:55,803 - INFO -   Chunk 3: 428,160 rows, 58.5 MB
+2025-09-19 12:36:55,803 - INFO - Split complete: 1,685,938 rows into 3 chunks
+2025-09-19 12:36:55,804 - INFO - 
+============================================================
+2025-09-19 12:36:55,805 - INFO - Processing: flow_dataset.csv
+2025-09-19 12:36:55,805 - INFO - ============================================================
+2025-09-19 12:36:55,811 - INFO - Processing /mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4/flow_dataset.csv (183.1 MB)
+2025-09-19 12:37:02,205 - INFO - Estimated rows per chunk: 728,168
+2025-09-19 12:37:09,678 - INFO -   Chunk 1: 0 rows, 86.1 MB
+2025-09-19 12:37:20,546 - INFO -   Chunk 2: 0 rows, 86.3 MB
+2025-09-19 12:37:21,660 - INFO -   Chunk 3: 103,442 rows, 12.3 MB
+2025-09-19 12:37:21,660 - INFO - Split complete: 1,559,778 rows into 3 chunks
+2025-09-19 12:37:21,661 - INFO - 
+============================================================
+2025-09-19 12:37:21,661 - INFO - Processing: cicflow_dataset.csv
+2025-09-19 12:37:21,662 - INFO - ============================================================
+2025-09-19 12:37:21,667 - INFO - Processing /mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4/cicflow_dataset.csv (118.0 MB)
+2025-09-19 12:37:26,410 - INFO - Estimated rows per chunk: 194,748
+2025-09-19 12:37:34,338 - INFO -   Chunk 1: 0 rows, 85.8 MB
+2025-09-19 12:37:37,384 - INFO -   Chunk 2: 74,139 rows, 32.5 MB
+2025-09-19 12:37:37,385 - INFO - Split complete: 268,887 rows into 2 chunks
+2025-09-19 12:37:37,389 - INFO - Created chunk information file: /mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4/github_chunks/README_CHUNKS.md
+2025-09-19 12:37:37,389 - INFO - 
+============================================================
+2025-09-19 12:37:37,389 - INFO - SPLITTING SUMMARY
+2025-09-19 12:37:37,390 - INFO - ============================================================
+2025-09-19 12:37:37,390 - INFO - Files processed successfully: 3/3
+2025-09-19 12:37:37,390 - INFO - Chunks saved to: /mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4/github_chunks
+2025-09-19 12:37:37,391 - INFO - ✅ All files split successfully!
+2025-09-19 12:37:37,391 - INFO - 📁 Upload the contents of '/mnt/c/Users/Intel/Desktop/adddosdn/dataset_generation/dataset_cleanup/../main_output/v4/github_chunks' to GitHub
+2025-09-19 12:37:37,392 - INFO - 📖 See README_CHUNKS.md for reconstruction instructions

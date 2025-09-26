@@ -1,0 +1,17 @@
+# Ignore the .claude folder and everything inside it
+.claude/
+
+# Ignore the CLAUDE.md file
+CLAUDE.md
+
+claude*
+
+*.old
+
+venv/
+pcap_env/
+
+__pycache__/
+dataset_generation/main_output/v4/cicflow_dataset.csv
+dataset_generation/main_output/v4/flow_dataset.csv
+dataset_generation/main_output/v4/packet_dataset.csv

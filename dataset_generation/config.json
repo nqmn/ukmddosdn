@@ -1,0 +1,11 @@
+{
+    "scenario_durations":
+    {
+        "initialization": 5,
+        "normal_traffic": 882,
+        "syn_flood": 30,
+        "udp_flood": 34,
+        "icmp_flood": 130,
+        "cooldown": 5
+    }
+}
