@@ -9,109 +9,8 @@ from datetime import datetime
 import pandas as pd
 import re
 import logging
+from src.utils.dataset_combiner import combine_datasets
 
-def combine_csv_files(datasets, filename, output_name, output_base, logger):
-    """Combine CSV files of the same type from all datasets."""
-    logger.info(f"Combining {filename} files into {output_name}")
-    combined_data = []
-    total_records = 0
-
-    for dataset_dir in datasets:
-        csv_path = dataset_dir / filename
-
-        if csv_path.exists():
-            try:
-                df = pd.read_csv(csv_path)
-                combined_data.append(df)
-                records = len(df)
-                total_records += records
-                logger.info(f"  {dataset_dir.name}: {records:,} records loaded")
-            except Exception as e:
-                logger.error(f"  Failed to read {csv_path}: {e}")
-        else:
-            logger.warning(f"  {csv_path} not found - skipping")
-
-    if combined_data:
-        final_df = pd.concat(combined_data, ignore_index=True)
-        output_path = output_base / output_name
-        final_df.to_csv(output_path, index=False)
-        logger.info(f"  Combined dataset saved: {output_name}")
-        logger.info(f"  Total records: {total_records:,}")
-        logger.info(f"  Final shape: {final_df.shape}")
-        return True, total_records, final_df.shape
-    else:
-        logger.error(f"  No data found for {filename}")
-        return False, 0, (0, 0)
-
-def combine_datasets(output_base):
-    """Combine datasets from all generated directories."""
-    print(f"\n[COMBINE] Starting dataset combination...")
-    
-    # Setup logging
-    log_path = output_base / "combine_datasets.log"
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(log_path, mode='w')
-        ]
-    )
-    logger = logging.getLogger(__name__)
-    
-    # Find dataset directories
-    datasets = []
-    if output_base.exists():
-        for item in output_base.iterdir():
-            if item.is_dir() and re.match(r'^\d{6}-\d+$', item.name):
-                datasets.append(item)
-    
-    datasets = sorted(datasets)
-    
-    if not datasets:
-        print("[COMBINE] No dataset directories found!")
-        return False
-    
-    print(f"[COMBINE] Found {len(datasets)} dataset directories:")
-    for dataset in datasets:
-        print(f"[COMBINE]   - {dataset.name}")
-    
-    # File combinations to process
-    file_combinations = [
-        ("packet_features.csv", "packet_dataset.csv"),
-        ("flow_features.csv", "flow_dataset.csv"),
-        ("cicflow_features.csv", "cicflow_dataset.csv")
-    ]
-    
-    results = []
-    total_combined_records = 0
-    
-    for source_filename, output_filename in file_combinations:
-        print(f"[COMBINE] Combining {source_filename} files...")
-        success, records, shape = combine_csv_files(datasets, source_filename, output_filename, output_base, logger)
-        results.append((output_filename, success, records, shape))
-        if success:
-            total_combined_records += records
-    
-    # Summary
-    print(f"\n[COMBINE] Dataset combination summary:")
-    successful_combinations = 0
-    for output_name, success, records, shape in results:
-        if success:
-            successful_combinations += 1
-            print(f"[COMBINE]   SUCCESS {output_name}: {records:,} records, shape {shape}")
-        else:
-            print(f"[COMBINE]   FAILED {output_name}: Failed to create")
-    
-    print(f"[COMBINE] Total files created: {successful_combinations}/3")
-    print(f"[COMBINE] Total records combined: {total_combined_records:,}")
-    
-    if successful_combinations == 3:
-        print("[COMBINE] All datasets combined successfully!")
-        return True
-    else:
-        print(f"[COMBINE] WARNING: {3 - successful_combinations} dataset(s) failed to combine")
-        return False
 
 def main():
     parser = argparse.ArgumentParser(description="Run main.py multiple times with different output directories (4-subnet topology)")
@@ -121,11 +20,15 @@ def main():
     parser.add_argument('--max-cores', type=int, help='Maximum number of CPU cores available')
     parser.add_argument('--combine', action='store_true', default=True, help='Combine datasets after all runs complete (default: True)')
     parser.add_argument('--no-combine', action='store_true', help='Skip dataset combination')
+    parser.add_argument('--no-pcap', action='store_true', help='Skip PCAP file combination (combine CSV only)')
     args = parser.parse_args()
     
     # Handle combine logic
     if args.no_combine:
         args.combine = False
+
+    # Handle PCAP combination logic
+    combine_pcap = args.combine and not args.no_pcap
 
     # Check for admin privileges (cross-platform)
     try:
@@ -311,7 +214,7 @@ def main():
 
     # Combine datasets if requested
     if args.combine and successful_runs > 0:
-        combine_success = combine_datasets(output_base)
+        combine_success = combine_datasets(output_base, include_pcap=combine_pcap)
         if not combine_success:
             print("\n[WARN] Dataset combination failed!")
 
@@ -321,7 +224,10 @@ def main():
     else:
         print("\n[DONE] All 4-subnet enterprise topology runs completed successfully!")
         if args.combine and successful_runs > 0:
-            print("[NOTES] Datasets with realistic enterprise network scenarios generated and combined.")
+            if combine_pcap:
+                print("[NOTES] Datasets and PCAP files with realistic enterprise network scenarios generated and combined.")
+            else:
+                print("[NOTES] Datasets with realistic enterprise network scenarios generated and combined (CSV only).")
         else:
             print("[NOTES] Datasets with realistic enterprise network scenarios generated.")
         sys.exit(0)
