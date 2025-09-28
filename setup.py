@@ -387,62 +387,38 @@ class UKMDDoSDNSetup:
 
         return all_passed
 
-    def download_ukmddosdn_repo(self):
-        """Download UKMDDoSDN repository from GitHub"""
-        print(f"\n[INFO] Downloading UKMDDoSDN repository from GitHub")
-
-        ukmddosdn_repo_url = "https://github.com/nqmn/ukmddosdn.git"
-        ukmddosdn_dir = os.path.join(self.suite_dir, "ukmddosdn")
-
-        original_dir = os.getcwd()
-
+    def create_suite_info(self):
+        """Create info file for the suite directory"""
         try:
             # Create suite directory if it doesn't exist
             if not os.path.exists(self.suite_dir):
                 os.makedirs(self.suite_dir)
                 print(f"[INFO] Created {self.suite_dir} directory")
 
-            # Remove existing ukmddosdn directory if it exists
-            if os.path.exists(ukmddosdn_dir):
-                print(f"[INFO] Removing existing {ukmddosdn_dir} directory")
-                subprocess.run(f"rm -rf {ukmddosdn_dir}", shell=True, check=True)
-
-            # Change to suite directory for cloning
-            os.chdir(self.suite_dir)
-
-            if not self.run_command(f"git clone {ukmddosdn_repo_url}", "Cloning UKMDDoSDN repository"):
-                return False
-
-            # Return to original directory
-            os.chdir(original_dir)
-
             # Create suite directory info file
             suite_info_file = os.path.join(self.suite_dir, "README.md")
             suite_info_content = """# UKMDDoSDN Suite Directory
 
-This directory contains all external dependencies and tools for the UKMDDoSDN project:
+This directory contains external dependencies for the UKMDDoSDN project:
 
 ## Contents:
 - **ryu/**: Ryu SDN controller framework (from https://github.com/nqmn/ryu.git)
 - **cicflowmeter/**: CICFlowMeter flow analysis tool (from https://github.com/nqmn/cicflowmeter.git)
-- **ukmddosdn/**: Main UKMDDoSDN project (from https://github.com/nqmn/ukmddosdn.git)
 
 ## Installation:
 All tools in this directory are installed system-wide with sudo privileges.
 
 ## Usage:
 Tools are accessible globally after installation via the main setup.py script.
+Main UKMDDoSDN project files remain in the parent directory.
 """
             with open(suite_info_file, 'w') as f:
                 f.write(suite_info_content)
             print(f"[INFO] Created {suite_info_file}")
-
-            print(f"[SUCCESS] UKMDDoSDN repository downloaded successfully")
             return True
 
         except Exception as e:
-            print(f"[ERROR] UKMDDoSDN repository download failed: {e}")
-            os.chdir(original_dir)
+            print(f"[WARNING] Could not create suite info file: {e}")
             return False
 
     def display_usage_info(self):
@@ -452,10 +428,10 @@ Tools are accessible globally after installation via the main setup.py script.
         print("="*60)
         print("\nInstallation Details:")
         print("  • All packages installed with sudo for system-wide access")
-        print("  • Installation directory: ukmddosdn-suite/")
+        print("  • Dependencies directory: ukmddosdn-suite/")
         print("  • Ryu installed in: ukmddosdn-suite/ryu/")
         print("  • CICFlowMeter installed in: ukmddosdn-suite/cicflowmeter/")
-        print("  • UKMDDoSDN repository in: ukmddosdn-suite/ukmddosdn/")
+        print("  • Main project files remain in current directory")
         print("  • PATH added to ~/.bashrc")
         print("  • Run 'source ~/.bashrc' or restart terminal")
         print("="*60)
@@ -495,11 +471,9 @@ Tools are accessible globally after installation via the main setup.py script.
         print(f"\n[STEP] Testing Mininet functionality")
         self.test_mininet_functionality()
 
-        # Download repository step
-        print(f"\n[STEP] Downloading UKMDDoSDN repository")
-        if not self.download_ukmddosdn_repo():
-            print(f"[FATAL] Setup failed at: Downloading UKMDDoSDN repository")
-            sys.exit(1)
+        # Create suite directory info file
+        print(f"\n[STEP] Creating suite directory documentation")
+        self.create_suite_info()
 
         self.display_usage_info()
 

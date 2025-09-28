@@ -22,7 +22,7 @@ A comprehensive framework for generating realistic cybersecurity datasets with b
 │   External      │    │   Corporate     │    │   Server/DMZ    │    │   Management    │
 │   Network       │    │   Internal      │    │   Network       │    │   Network       │
 │                 │    │                 │    │                 │    │                 │
-│ h1: 192.168.10.x│    │h2-h5: 192.168.20.x│  │ h6: 192.168.30.x│    │Controller: 192.168.0.x│
+│ h1: 192.168.10.x│    │h2-h5: 192.168.20.x│  │ h6: 192.168.30.x│    │ C0: 192.168.0.x │
 └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -42,14 +42,13 @@ A comprehensive framework for generating realistic cybersecurity datasets with b
 ### Prerequisites
 - **Ubuntu 24.04.3** (recommended)
 - **Root privileges** (required for Mininet)
-- **Multi-core system** (recommended for optimal performance)
 - **Sufficient disk space** (datasets can be large)
 
 ### Installation
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/nqmn/ukmddosdn.git
    cd ukmddosdn
    ```
 
@@ -62,30 +61,31 @@ A comprehensive framework for generating realistic cybersecurity datasets with b
    - System packages (Mininet, Git, Python3, Curl, tshark, slowhttptest)
    - Ryu SDN controller (from GitHub)
    - CICFlowMeter (from GitHub)
-   - UKMDDoSDN repository (from GitHub)
    - All Python dependencies
 
+   Dependencies will be installed in `ukmddosdn-suite/` subdirectory.
 
-### Basic Usage
+
+### Dataset Generation (Basic Usage)
 
 **Single dataset generation**:
 ```bash
-sudo python3 ukmddosdn-suite/ukmddosdn/dataset_generation/main.py
+sudo python3 dataset_generation/main.py
 ```
 
 **With custom configuration**:
 ```bash
-sudo python3 ukmddosdn-suite/ukmddosdn/dataset_generation/main.py config.json
+sudo python3 dataset_generation/main.py config.json
 ```
 
-**Bulk generation (multiple runs)**:
+**Bulk generation (multiple runs)** (preferable as this also will combine the datasets):
 ```bash
-sudo python3 ukmddosdn-suite/ukmddosdn/dataset_generation/main.py --runs 4 --config config.json
+sudo python3 dataset_generation/run_bulk_main.py --runs 4 --config config.json
 ```
 
 **With CPU optimization**:
 ```bash
-sudo python3 ukmddosdn-suite/ukmddosdn/dataset_generation/main.py --cores 4 --max-cores 16
+sudo python3 dataset_generation/main.py --cores 4 --max-cores 16
 ```
 
 ## Project Structure
@@ -93,7 +93,6 @@ sudo python3 ukmddosdn-suite/ukmddosdn/dataset_generation/main.py --cores 4 --ma
 ```
 ukmddosdn/
 ├── README.md                           # This file
-├── CLAUDE.md                          # Claude Code instructions
 ├── setup.py                           # Automated installation script
 ├── config.json                        # Default configuration
 ├── dataset_generation/
@@ -110,8 +109,7 @@ ukmddosdn/
 └── ukmddosdn-suite/                   # External dependencies
     ├── README.md                      # Suite documentation
     ├── ryu/                          # Ryu SDN controller
-    ├── cicflowmeter/                 # CICFlowMeter tool
-    └── ukmddosdn/                    # Main UKMDDoSDN repository
+    └── cicflowmeter/                 # CICFlowMeter tool
 ```
 
 ## Configuration

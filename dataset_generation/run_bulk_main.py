@@ -9,7 +9,54 @@ from datetime import datetime
 import pandas as pd
 import re
 import logging
-from src.utils.dataset_combiner import combine_datasets
+from src.utils.dataset_combiner import combine_datasets, DatasetCombiner
+
+
+def check_combined_csv_files(output_base):
+    """Check if combined CSV dataset files already exist."""
+    csv_files = ["packet_dataset.csv", "flow_dataset.csv", "cicflow_dataset.csv"]
+    return all((output_base / csv_file).exists() for csv_file in csv_files)
+
+
+def check_combined_pcap_files(output_base):
+    """Check if combined PCAP files already exist."""
+    pcap_files = ["normal_combined.pcap", "syn_flood_combined.pcap",
+                  "udp_flood_combined.pcap", "icmp_flood_combined.pcap"]
+    return all((output_base / pcap_file).exists() for pcap_file in pcap_files)
+
+
+def combine_datasets_pcap_only(output_base):
+    """Combine PCAP files only."""
+    combiner = DatasetCombiner(output_base)
+    datasets = combiner.find_dataset_directories()
+
+    if not datasets:
+        print("[COMBINE] No dataset directories found!")
+        return False
+
+    print(f"[COMBINE] Combining PCAP files only from {len(datasets)} directories")
+
+    pcap_results = []
+    total_combined_pcaps = 0
+    total_pcap_size = 0
+
+    for source_filename, output_filename in combiner.pcap_combinations:
+        print(f"[COMBINE] Combining {source_filename} files...")
+        success, files_count, size_mb = combiner.combine_pcap_files(
+            datasets, source_filename, output_filename
+        )
+        pcap_results.append((output_filename, success, files_count, size_mb))
+        if success:
+            total_combined_pcaps += files_count
+            total_pcap_size += size_mb
+
+    # Print summary for PCAP only
+    successful_pcap = sum(1 for _, success, _, _ in pcap_results if success)
+    print(f"\n[COMBINE] PCAP combination summary:")
+    print(f"[COMBINE] PCAP files created: {successful_pcap}/{len(combiner.pcap_combinations)}")
+    print(f"[COMBINE] Total PCAP size combined: {total_pcap_size} MB")
+
+    return successful_pcap == len(combiner.pcap_combinations)
 
 
 def main():
@@ -21,14 +68,64 @@ def main():
     parser.add_argument('--combine', action='store_true', default=True, help='Combine datasets after all runs complete (default: True)')
     parser.add_argument('--no-combine', action='store_true', help='Skip dataset combination')
     parser.add_argument('--no-pcap', action='store_true', help='Skip PCAP file combination (combine CSV only)')
+    parser.add_argument('--skip-dataset-generation', action='store_true', help='Skip dataset generation, only run combination logic')
+    parser.add_argument('--combine-dataset', action='store_true', help='Force dataset combination using smart conditional logic')
     args = parser.parse_args()
     
     # Handle combine logic
     if args.no_combine:
         args.combine = False
 
+    # Force combination if --combine-dataset is specified OR if skipping dataset generation
+    if args.combine_dataset or args.skip_dataset_generation:
+        args.combine = True
+
     # Handle PCAP combination logic
     combine_pcap = args.combine and not args.no_pcap
+
+    # If skipping dataset generation, jump directly to combination logic
+    if args.skip_dataset_generation:
+        base_dir = Path(__file__).parent.resolve()
+        output_base = base_dir / "main_output"
+
+        if not output_base.exists():
+            print("ERROR: No main_output directory found. Run dataset generation first.")
+            sys.exit(1)
+
+        print("[SKIP] Skipping dataset generation - running combination logic only")
+        print(f"[COMBINE] Base directory: {base_dir}")
+        print(f"[COMBINE] Output directory: {output_base}")
+
+        if args.combine:
+            # Run smart combination logic
+            csv_combined = check_combined_csv_files(output_base)
+            pcap_combined = check_combined_pcap_files(output_base)
+
+            combine_csv_needed = not csv_combined
+            combine_pcap_needed = combine_pcap and not pcap_combined
+
+            if combine_csv_needed and combine_pcap_needed:
+                print("\n[COMBINE] No combined files found - combining both CSV and PCAP files")
+                combine_success = combine_datasets(output_base, include_pcap=True)
+            elif combine_csv_needed and not combine_pcap_needed:
+                print("\n[COMBINE] Combined PCAP files exist - combining CSV files only")
+                combine_success = combine_datasets(output_base, include_pcap=False)
+            elif not combine_csv_needed and combine_pcap_needed:
+                print("\n[COMBINE] Combined CSV files exist - combining PCAP files only")
+                combine_success = combine_datasets_pcap_only(output_base)
+            else:
+                print("\n[COMBINE] All combined files already exist - skipping combination")
+                combine_success = True
+
+            if combine_success:
+                print("\n[DONE] Dataset combination completed successfully!")
+                sys.exit(0)
+            else:
+                print("\n[FAIL] Dataset combination failed!")
+                sys.exit(1)
+        else:
+            print("\n[SKIP] Combination disabled - nothing to do")
+            sys.exit(0)
 
     # Check for admin privileges (cross-platform)
     try:
@@ -212,9 +309,29 @@ def main():
     print("   - Enterprise network segmentation testing")
     print("   - Layer 3 routing attack scenarios")
 
-    # Combine datasets if requested
+    # Smart dataset combination logic
     if args.combine and successful_runs > 0:
-        combine_success = combine_datasets(output_base, include_pcap=combine_pcap)
+        # Check what files are already combined
+        csv_combined = check_combined_csv_files(output_base)
+        pcap_combined = check_combined_pcap_files(output_base)
+
+        # Determine what needs to be combined
+        combine_csv_needed = not csv_combined
+        combine_pcap_needed = combine_pcap and not pcap_combined
+
+        if combine_csv_needed and combine_pcap_needed:
+            print("\n[COMBINE] No combined files found - combining both CSV and PCAP files")
+            combine_success = combine_datasets(output_base, include_pcap=True)
+        elif combine_csv_needed and not combine_pcap_needed:
+            print("\n[COMBINE] Combined PCAP files exist - combining CSV files only")
+            combine_success = combine_datasets(output_base, include_pcap=False)
+        elif not combine_csv_needed and combine_pcap_needed:
+            print("\n[COMBINE] Combined CSV files exist - combining PCAP files only")
+            combine_success = combine_datasets_pcap_only(output_base)
+        else:
+            print("\n[COMBINE] All combined files already exist - skipping combination")
+            combine_success = True
+
         if not combine_success:
             print("\n[WARN] Dataset combination failed!")
 
